@@ -1,4 +1,8 @@
 <script>
+/** 数据源对比组件：记录第一次传入的值，当改变该值时，内容红色高亮，同时做了两位有限小数的限制
+*
+* @param { any } 所有el-input组件原生支持的参数都可以
+*/
 export default {
   data () {
     return {
@@ -35,7 +39,7 @@ export default {
       attrs: { ...this.$attrs }
     }
 
-    return <el-input {...props} value={ this.val } onInput={ this.OnInput } nativeOn-keydown={ this.OnKeydown } class={ this.dataChanged ? 'red-for-change-record' : ''}></el-input>
+    return <el-input {...props} value={ this.val } onInput={ this.OnInput } step="0.01" nativeOn-keydown={ this.OnKeydown } class={ this.dataChanged ? 'red-for-change-record' : ''}></el-input>
   },
   created () {
     const reg = /([0-9]*\.?)(.*)/
