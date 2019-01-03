@@ -10,7 +10,7 @@ export default {
       <el-breadcrumb separator-class="el-icon-arrow-right">
         {
           this.crumbData.map(item => {
-            return <el-breadcrumb-item to={ item.to }>{ item.label }</el-breadcrumb-item>
+            return <el-breadcrumb-item to={ item.to } replace={ item.replace } separator={ item.separator } separator-class={ item['separator-class'] }>{ item.label }</el-breadcrumb-item>
           })
         }
       </el-breadcrumb>
