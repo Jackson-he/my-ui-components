@@ -54,6 +54,7 @@ export default {
       <el-table
         data={ this.tableData }
         stripe border
+        ref="table"
         { ...props }
         >
         {
@@ -61,6 +62,13 @@ export default {
         }
       </el-table>
     )
+  },
+  mounted () {
+    // 把Element扩展到组件实例上的Table Methods方法扩展到父组件实例上
+    const tableMethods = ['clearSelection', 'toggleRowSelection', 'toggleAllSelection', 'toggleRowExpansion', 'setCurrentRow', 'clearSort', 'clearFilter', 'doLayout', 'sort']
+    tableMethods.forEach(item =>{
+      this[item] = this.$refs.table[item]
+    })
   }
 }
 </script>
