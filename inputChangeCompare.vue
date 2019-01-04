@@ -17,6 +17,10 @@ export default {
   props: {
     value: {
       type: [ String, Number ]
+    },
+    numberType: {
+      type: String,
+      default: 'float'
     }
   },
   watch: {
@@ -38,31 +42,44 @@ export default {
     const props = {
       attrs: { ...this.$attrs }
     }
-
-    return <el-input {...props} value={ this.val } onInput={ this.OnInput } step="0.01" nativeOn-keydown={ this.OnKeydown } class={ this.dataChanged ? 'red-for-change-record' : ''}></el-input>
+    const step = this.numberType === 'float' ? '0.01' : '1'
+    return <el-input {...props} value={ this.val } onInput={ this.OnInput } step={ step } nativeOn-keydown={ this.OnKeydown } class={ this.dataChanged ? 'red-for-change-record' : ''}></el-input>
   },
   created () {
-    const reg = /([0-9]*\.?)(.*)/
-    this.DASHED = String(this.val).match(reg)[2]
+    if (this.numberType === 'float') {
+      const reg = /([0-9]*\.?)(.*)/
+      this.DASHED = String(this.val).match(reg)[2]
+    }
   },
   methods: {
     OnInput (val) {
-      const reg = /([0-9]*\.?)(.*)/
-      this.DASHED = val.match(reg)[2]
-
+      if (this.numberType === 'float') {
+        const reg = /([0-9]*\.?)(.*)/
+        this.DASHED = val.match(reg)[2]
+      }
       this.val = this.typeofValue === 'number' ? +val : val
       this.$emit('input', this.val)
     },
     OnKeydown (event) {
+      const _ = 189
       const deleteKeyCode = 46
       const backSpaceKeyCode = 8
+      const dwArrow = 190
+      const dot = 110
+      const isDot = [_, dwArrow, dot].includes(event.keyCode)
       const isEmptyKey = [deleteKeyCode, backSpaceKeyCode].includes(event.keyCode)
 
-      if (this.DASHED.length > 0 && !isEmptyKey) {
-        event.returnValue = /^\d*$/.test(event.key)
-        if (this.DASHED.length > 1) {
-          event.returnValue = false
+      if (this.numberType === 'float') {
+        if (this.DASHED.length > 0 && !isEmptyKey) {
+          event.returnValue = /^\d*$/.test(event.key)
+          if (this.DASHED.length > 1) {
+            event.returnValue = false
+          }
         }
+      }
+
+      if (this.numberType === 'integer') {
+        event.returnValue = !isDot
       }
     }
   }
