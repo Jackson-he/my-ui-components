@@ -1,7 +1,8 @@
 <script>
 /** 数据源对比组件：记录第一次传入的值，当改变该值时，内容红色高亮，同时做了两位有限小数的限制
 *
-* @param { any } 所有el-input组件原生支持的参数都可以
+* @param { String } numberType 数字类型 float(默认) 或 interger
+* @param { Number } precision 精度
 */
 export default {
   data () {
@@ -11,16 +12,17 @@ export default {
       tracked: false, // 数据是否已追踪
       originVal: '', // 原始值
       typeofValue: '', // 输入值的类型
-      DASHED: ''
+      reg: '' // 匹配值的正则
     }
   },
   props: {
     value: {
       type: [ String, Number ]
     },
-    numberType: {
-      type: String,
-      default: 'float'
+    // 数字精度
+    precision: {
+      type: Number,
+      default: 0
     }
   },
   watch: {
@@ -38,48 +40,42 @@ export default {
       immediate: true
     }
   },
+  created () {
+    this.reg = this.precision === 0
+      ? new RegExp(`^\\d*`, 'g')
+      : new RegExp(`^\\d*(\\.?\\d{0,${this.precision}})`, 'g')
+  },
   render () {
     const props = {
       attrs: { ...this.$attrs }
     }
-    const step = this.numberType === 'float' ? '0.01' : '1'
-    return <el-input {...props} value={ this.val } onInput={ this.OnInput } step={ step } nativeOn-keydown={ this.OnKeydown } class={ this.dataChanged ? 'red-for-change-record' : ''}></el-input>
-  },
-  created () {
-    if (this.numberType === 'float') {
-      const reg = /([0-9]*\.?)(.*)/
-      this.DASHED = String(this.val).match(reg)[2]
+
+    let step
+    if (this.precision === 0) {
+      step = 1
+    } else {
+      step = 1 / (Math.pow(10, this.precision))
     }
+
+    return <input {...props} value={ this.val } onInput={ this.OnInput } type="number" on-keydown={ this.OnKeydown } step={ step } class={ this.dataChanged ? 'red-for-change-record my-input' : 'my-input'}></input>
   },
   methods: {
-    OnInput (val) {
-      if (this.numberType === 'float') {
-        const reg = /([0-9]*\.?)(.*)/
-        this.DASHED = val.match(reg)[2]
-      }
+    OnInput (e) {
+      e.target.value = (e.target.value.match(this.reg)[0]) || null
+
+      const val = e.target.value
       this.val = this.typeofValue === 'number' ? +val : val
       this.$emit('input', this.val)
     },
-    OnKeydown (event) {
-      const _ = 189
-      const deleteKeyCode = 46
-      const backSpaceKeyCode = 8
-      const dwArrow = 190
-      const dot = 110
-      const isDot = [_, dwArrow, dot].includes(event.keyCode)
-      const isEmptyKey = [deleteKeyCode, backSpaceKeyCode].includes(event.keyCode)
-
-      if (this.numberType === 'float') {
-        if (this.DASHED.length > 0 && !isEmptyKey) {
-          event.returnValue = /^\d*$/.test(event.key)
-          if (this.DASHED.length > 1) {
-            event.returnValue = false
+    OnKeydown (e) {
+      if (e.key === '.') {
+        if (this.precision === 0) {
+          e.returnValue = false
+        } else {
+          if (this.val.split('.').length > 1) {
+            e.returnValue = false
           }
         }
-      }
-
-      if (this.numberType === 'integer') {
-        event.returnValue = !isDot
       }
     }
   }
@@ -87,8 +83,29 @@ export default {
 </script>
 <style lang="scss">
   .red-for-change-record {
-    input {
-      color: red!important;
+    color: red!important;
+  }
+  .my-input {
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: none;
+    border-radius: 4px;
+    border: 1px solid #dcdfe6;
+    box-sizing: border-box;
+    color: #606266;
+    display: inline-block;
+    font-size: inherit;
+    height: 32px;
+    line-height: 32px;
+    outline: none;
+    padding: 0 15px;
+    transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    width: 100%;
+    &:disabled {
+      background-color: #f5f7fa;
+      border-color: #e4e7ed;
+      color: #c0c4cc;
+      cursor: not-allowed;
     }
   }
 </style>
