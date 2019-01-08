@@ -49,12 +49,7 @@ export default {
       attrs: { ...this.$attrs }
     }
 
-    let step
-    if (this.precision === 0) {
-      step = 1
-    } else {
-      step = 1 / (Math.pow(10, this.precision))
-    }
+    let step = 1 / (Math.pow(10, this.precision))
 
     return <input {...props} value={ this.val } onInput={ this.OnInput } type="number" on-keydown={ this.OnKeydown } step={ step } class={ this.dataChanged ? 'red-for-change-record my-input' : 'my-input'}></input>
   },
